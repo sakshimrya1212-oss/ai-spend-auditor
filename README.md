@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💸 AI Spend Auditor
 
-## Getting Started
+A free tool that audits your team's AI tool spending and finds exactly where you're overpaying — instant results, no login required. Built for startups, dev teams, and anyone paying for multiple AI subscriptions.
 
-First, run the development server:
+🔗 **Live:** https://ai-spend-auditor-rose.vercel.app
+
+## Screenshots
+
+> Add 3 screenshots here after deployment (form page, results page, email capture)
+
+## Quick Start
 
 ```bash
+git clone https://github.com/sakshimrya1212-oss/ai-spend-auditor.git
+cd ai-spend-auditor
+npm install
+cp .env.local.example .env.local
+# Fill in your keys in .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_KEY=
+RESEND_API_KEY=
+ANTHROPIC_API_KEY=
+NEXT_PUBLIC_APP_URL=
+```
 
-## Learn More
+## Decisions
 
-To learn more about Next.js, take a look at the following resources:
+1. **Next.js over plain React** — API routes built-in, no separate backend needed. Saved ~2 hours of setup.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Hardcoded audit rules over AI** — Audit math needs to be deterministic and defensible. AI hallucinations in financial recommendations would break trust. Rules are transparent and auditable.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Supabase over Firebase** — Postgres gives proper relational queries. Free tier is generous. SQL is easier to reason about than Firestore.
 
-## Deploy on Vercel
+4. **Honeypot over CAPTCHA** — hCaptcha adds friction before value is shown. Honeypot is invisible to real users and catches most bots with zero UX cost.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Email after value, never before** — Capturing email before showing results kills conversion. Show savings first, then ask for email to "send the report."
