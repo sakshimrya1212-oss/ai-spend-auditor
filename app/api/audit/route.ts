@@ -4,7 +4,7 @@ import { runAuditEngine } from '../../../lib/auditEngine';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 async function generateSummary(results: any[], totalSavings: number, useCase: string): Promise<string> {
