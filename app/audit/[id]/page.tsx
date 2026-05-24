@@ -25,6 +25,7 @@ type AuditData = {
 export default function AuditPage() {
   const { id } = useParams();
   const [audit, setAudit] = useState<AuditData | null>(null);
+const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
@@ -36,9 +37,21 @@ export default function AuditPage() {
   useEffect(() => {
     fetch(`/api/audit/${id}`)
       .then(r => r.json())
-      .then(data => { setAudit(data); setLoading(false); });
+      .then(data => {
+        if (data.error) { setError(true); setLoading(false); return; }
+        // Normalize data
+        const normalized = {
+          ...data,
+          results: data.results || [],
+          total_monthly_savings: data.total_monthly_savings ?? 0,
+          summary: data.summary || '',
+        };
+        setAudit(normalized);
+        setLoading(false);
+      })
+      .catch(() => { setError(true); setLoading(false); });
   }, [id]);
-
+  
   const handleEmailSubmit = async () => {
     if (!email) return;
     await fetch('/api/leads', {
@@ -64,7 +77,18 @@ export default function AuditPage() {
     </div>
   );
 
-  if (!audit) return (
+  if (error) return (
+    <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-5xl mb-4">❌</div>
+        <p className="text-gray-400">Audit not found. Please run a new audit.</p>
+        <a href="/" className="text-blue-400 mt-4 block">← Go back</a>
+      </div>
+    </div>
+  );
+
+if (!audit) return (
+  
     <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
       <p className="text-gray-400">Audit not found.</p>
     </div>
