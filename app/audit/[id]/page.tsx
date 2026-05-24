@@ -25,7 +25,6 @@ type AuditData = {
 export default function AuditPage() {
   const { id } = useParams();
   const [audit, setAudit] = useState<AuditData | null>(null);
-const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [email, setEmail] = useState('');
@@ -37,21 +36,9 @@ const [error, setError] = useState(false);
   useEffect(() => {
     fetch(`/api/audit/${id}`)
       .then(r => r.json())
-      .then(data => {
-        if (data.error) { setError(true); setLoading(false); return; }
-        // Normalize data
-        const normalized = {
-          ...data,
-          results: data.results || [],
-          total_monthly_savings: data.total_monthly_savings ?? 0,
-          summary: data.summary || '',
-        };
-        setAudit(normalized);
-        setLoading(false);
-      })
-      .catch(() => { setError(true); setLoading(false); });
+      .then(data => { setAudit(data); setLoading(false); });
   }, [id]);
-  
+
   const handleEmailSubmit = async () => {
     if (!email) return;
     await fetch('/api/leads', {
@@ -77,18 +64,7 @@ const [error, setError] = useState(false);
     </div>
   );
 
-  if (error) return (
-    <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-5xl mb-4">❌</div>
-        <p className="text-gray-400">Audit not found. Please run a new audit.</p>
-        <a href="/" className="text-blue-400 mt-4 block">← Go back</a>
-      </div>
-    </div>
-  );
-
-if (!audit) return (
-  
+  if (!audit) return (
     <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
       <p className="text-gray-400">Audit not found.</p>
     </div>
@@ -151,7 +127,7 @@ const isOptimal = totalSavings < 100;
         {/* Per Tool Breakdown */}
         <div className="space-y-4 mb-8">
           <h2 className="text-xl font-semibold">Tool-by-Tool Breakdown</h2>
-          {audit.results.map(result => {
+          {(audit.results || []).map(result => {
             const config = statusConfig[result.status];
             return (
               <div key={result.toolId} className={`rounded-2xl p-6 border ${config.color}`}>
